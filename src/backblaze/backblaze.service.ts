@@ -25,13 +25,12 @@ export class BackblazeService {
         fileName: name,
         uploadUrl: data.uploadUrl,
         uploadAuthToken: data.authorizationToken,
-      });
-      const url = result.data.fileId;
-      const newFile: FileModel = { Url: url };
-      if (type) newFile.category = type;
-      if (name) newFile.name = name;
-      await this.fileModel.create(newFile);
-      return url;
+      })
+      const url = result.data.fileId
+      const newFile: FileModel = { Url: url,name}
+      if (type) newFile.category = type
+      await this.fileModel.create(newFile)
+      return url
     } catch (error) {
       console.error(error);
       throw new Error('Something goes wrong');

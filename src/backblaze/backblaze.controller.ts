@@ -8,17 +8,19 @@ import {
   BadRequestException,
   Body,
   UploadedFile,
+  Body,
+
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import * as mimeTypes from 'mime-types';
-
 import { BackblazeService } from './backblaze.service';
 import { ValidateUploadFiels } from './decorators/validate.upload.files.decorator';
 import { FileService } from '../files/file.service';
 import { extname } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { IEnv } from 'src/configs/env.config';
+import { UploadImageDto } from './dto/upload-image.dto';
 
 const singleExtensionRegex = /^[^.]+\.[a-zA-Z0-9]+$/;
 
@@ -34,6 +36,7 @@ export class BackBlazeController {
   async uploadImage(
     @ValidateUploadFiels(2_097_152, 'image')
     images: Express.Multer.File[],
+    @Body() uploadImageDto: UploadImageDto,
   ) {
     if (!images) {
       throw new BadRequestException('No files uploaded');
@@ -41,7 +44,11 @@ export class BackBlazeController {
     const links = await Promise.all(
       images.map((image) =>
         // this.fileService.convertToWebP(image.buffer, image.originalname),
-        this.backblazeService.uploadFile(image.buffer, image.originalname),
+        this.backblazeService.uploadFile(
+          image.buffer,
+          image.originalname,
+          uploadImageDto.type,
+        ),
       ),
     );
     return links;
@@ -100,7 +107,13 @@ export class BackBlazeController {
 
   @Get(':url')
   async getFileByUrl(@Param('url') url: string, @Res() response: Response) {
-    (await this.backblazeService.getFile(url)).pipe(response);
+    response.setHeader('Content-type', 'image');
+    console.log(url);
+    const stream = await this.backblazeService.getFile(url);
+    stream.on('data', (data) => response.write(data));
+    stream.on('end', () => {
+      response.end();
+    });
   }
 
   @Get('/document/:url')
