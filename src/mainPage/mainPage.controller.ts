@@ -2,7 +2,9 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MainService } from './mainPage.service';
 import { MainDto } from './dto/mainPage.dto';
 import { MainModel } from './mainPage.model/mainPage.model';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('main')
 @Controller('main')
 export class MainController {
   constructor(private readonly mainService: MainService) {}

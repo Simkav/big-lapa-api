@@ -11,7 +11,9 @@ import {
 import { DogCard } from './dog-card.model';
 import { DogCardService } from './dog-card.service';
 import { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('dog-cards')
 @Controller('dog-cards')
 export class DogCardController {
   constructor(private readonly dogCardService: DogCardService) {}
