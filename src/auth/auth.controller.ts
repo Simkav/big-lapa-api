@@ -14,7 +14,9 @@ import { AuthDto } from './dto/auth.dto';
 import { ALREADY_REGISTERED_ERROR } from './authConstants';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { UserName } from 'src/decorators/user.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

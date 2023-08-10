@@ -19,9 +19,18 @@ import { extname } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { IEnv } from 'src/configs/env.config';
 import { UploadImageDto } from './dto/upload-image.dto';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 const singleExtensionRegex = /^[^.]+\.[a-zA-Z0-9]+$/;
 
+@ApiTags('files')
 @Controller('files')
 export class BackBlazeController {
   constructor(
@@ -30,6 +39,29 @@ export class BackBlazeController {
     private readonly configService: ConfigService<IEnv>,
   ) {}
   @Post('images')
+  @ApiCreatedResponse({ description: 'Array of ids of created images' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['images'],
+      properties: {
+        category: {
+          type: 'string',
+          description:
+            'category by which you can filter then like slider logo etc',
+        },
+        images: {
+          description: 'Images to upload, maximum 6',
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
   @UseInterceptors(FilesInterceptor('images', 6))
   async uploadImage(
     @ValidateUploadFiels(2_097_152, 'image')
@@ -45,7 +77,7 @@ export class BackBlazeController {
         this.backblazeService.uploadFile(
           image.buffer,
           image.originalname,
-          uploadImageDto.type,
+          uploadImageDto.category,
         ),
       ),
     );
@@ -53,6 +85,7 @@ export class BackBlazeController {
   }
 
   @Post('documents')
+  @ApiCreatedResponse({ description: 'Id of created document' })
   @UseInterceptors(
     FileInterceptor('document', {
       fileFilter: (req, file, cb) => {
@@ -115,6 +148,7 @@ export class BackBlazeController {
   }
 
   @Get('/document/:url')
+  @ApiParam({ name: 'url', description: 'id of document', required: true })
   async getDocumentByUrl(@Param('url') url: string, @Res() response: Response) {
     const getFileName = await this.backblazeService.getFileInfo(url);
     console.log(getFileName.name);
