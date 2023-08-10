@@ -6,10 +6,8 @@ import {
   UseInterceptors,
   Res,
   BadRequestException,
-  Body,
   UploadedFile,
   Body,
-
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
