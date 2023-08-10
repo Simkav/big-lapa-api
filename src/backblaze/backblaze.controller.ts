@@ -6,8 +6,10 @@ import {
   UseInterceptors,
   Res,
   BadRequestException,
+  Body,
   UploadedFile,
   Body,
+
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -124,5 +126,12 @@ export class BackBlazeController {
       `attachment; filename=${encodeURI(getFileName.name)}`,
     );
     (await this.backblazeService.getFile(url)).pipe(response);
+  }
+
+  @Get('category/:category')
+  async getImagesByCategory(@Param('category') category: string) {
+    const images = await this.backblazeService.getImagesByCategory(category);
+    const imageUrls = images.map((image) => image.Url);
+    return imageUrls;
   }
 }
