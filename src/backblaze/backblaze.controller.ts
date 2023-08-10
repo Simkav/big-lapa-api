@@ -98,6 +98,7 @@ export class BackBlazeController {
 
   @Get(':url')
   async getFileByUrl (@Param('url') url: string, @Res() response: Response) {
+    response.setHeader('Content-type','image')
     console.log(url)
     const stream =  await this.backblazeService.getFile(url)
     stream.on('data',data=>response.write(data))
