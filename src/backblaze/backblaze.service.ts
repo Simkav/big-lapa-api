@@ -27,9 +27,8 @@ export class BackblazeService {
         uploadAuthToken: data.authorizationToken,
       })
       const url = result.data.fileId
-      const newFile: FileModel = { Url: url }
+      const newFile: FileModel = { Url: url,name}
       if (type) newFile.category = type
-      if (name) newFile.name = name
       await this.fileModel.create(newFile)
       return url
     } catch (error) {
