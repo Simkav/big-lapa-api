@@ -6,13 +6,11 @@ import {
   UseInterceptors,
   Res,
   BadRequestException,
-  Body,
   UploadedFile,
 } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
 import * as mimeTypes from 'mime-types'
-
 import { BackblazeService } from './backblaze.service'
 import { ValidateUploadFiels } from './decorators/validate.upload.files.decorator'
 import { FileService } from '../files/file.service'
@@ -100,7 +98,12 @@ export class BackBlazeController {
 
   @Get(':url')
   async getFileByUrl (@Param('url') url: string, @Res() response: Response) {
-    ;(await this.backblazeService.getFile(url)).pipe(response)
+    console.log(url)
+    const stream =  await this.backblazeService.getFile(url)
+    stream.on('data',data=>response.write(data))
+    stream.on('end',()=>{
+      response.end()
+    })
   }
 
   @Get('/document/:url')
