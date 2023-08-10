@@ -4,5 +4,5 @@ import { IsString } from 'class-validator';
 export class UploadImageDto {
   @ApiPropertyOptional()
   @IsString()
-  type?: string;
+  category?: string;
 }
