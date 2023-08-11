@@ -8,6 +8,7 @@ import {
   BadRequestException,
   UploadedFile,
   Body,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -27,6 +28,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { GetCategoryResponse } from './dto/get-category-res.dto';
 
 const singleExtensionRegex = /^[^.]+\.[a-zA-Z0-9]+$/;
 
@@ -151,7 +153,6 @@ export class BackBlazeController {
   @ApiParam({ name: 'url', description: 'id of document', required: true })
   async getDocumentByUrl(@Param('url') url: string, @Res() response: Response) {
     const getFileName = await this.backblazeService.getFileInfo(url);
-    console.log(getFileName.name);
     response.setHeader('Content-Type', 'application/octet-stream');
     response.setHeader(
       'Content-Disposition',
@@ -161,9 +162,21 @@ export class BackBlazeController {
   }
 
   @Get('category/:category')
-  async getImagesByCategory(@Param('category') category: string) {
-    const images = await this.backblazeService.getImagesByCategory(category);
-    const imageUrls = images.map((image) => image.Url);
-    return imageUrls;
+  @ApiOkResponse({ type: GetCategoryResponse })
+  async getImagesByCategory(
+    @Param('category') category: string,
+  ): Promise<GetCategoryResponse[]> {
+    const files = await this.backblazeService.getFilesByCategory(category);
+    const filesResponse = files.map((file) => ({
+      Url: file.Url,
+      name: file.name,
+    }));
+    return filesResponse;
+  }
+
+  @Delete(':id')
+  async deleteFileById(@Param('id') id: string) {
+    const result = await this.backblazeService.deleteFile(id);
+    return { status: result };
   }
 }

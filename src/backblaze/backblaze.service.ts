@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import BackBlazeB2 from 'backblaze-b2';
 import { ConfigService } from '@nestjs/config';
 import { IEnv } from 'src/configs/env.config';
@@ -55,7 +55,18 @@ export class BackblazeService {
     }
   }
 
-  async getImagesByCategory(category: string): Promise<FileModel[]> {
+  async getFilesByCategory(category: string): Promise<FileModel[]> {
     return this.fileModel.find({ category: category.toLowerCase() }).exec();
+  }
+
+  async deleteFile(id: string): Promise<boolean> {
+    const file = await this.fileModel.findOne({ Url: id });
+    if (file === null) {
+      throw new NotFoundException('File not found');
+    }
+    const { fileName } = (await this.bb2.getFileInfo({ fileId: id })).data;
+    (await this.bb2.deleteFileVersion({ fileId: id, fileName })).data;
+    await this.fileModel.deleteOne({ Url: id });
+    return true;
   }
 }
