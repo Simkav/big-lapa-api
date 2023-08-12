@@ -10,15 +10,20 @@ import {
 import { AuthDto } from './dto/auth.dto';
 import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
-import { JwtStratagy } from './strategies/jwt.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { ConfigService } from '@nestjs/config';
+import jwt from 'jsonwebtoken';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let authService: AuthService;
+  const JWT_SECRET = 'defaultSecret';
+
+  const realToken = jwt.sign({ userName: 'testUser' }, JWT_SECRET);
 
   const mockAuthService = {
     findUser: jest.fn().mockImplementation((userName: string) => {
-      console.log('findUser mock called with:', userName);
+      // console.log('findUser mock called with:', userName);
       return Promise.resolve(null);
     }),
     createUser: jest.fn().mockImplementation((dto: AuthDto) => {
@@ -57,16 +62,27 @@ describe('AuthController (e2e)', () => {
       ),
   };
 
-  const mockJwtService = {
-    signAsync: jest
-      .fn()
-      .mockImplementation((payload) => Promise.resolve('mockedToken')),
-  };
-
   const mockJwtStrategy = {
     validate: jest
       .fn()
       .mockImplementation(({ userName }) => Promise.resolve(userName)),
+  };
+
+  const mockJwtService = {
+    sign: jest.fn().mockImplementation(() => realToken),
+  };
+
+  const mockConfigService = {
+    get: jest.fn().mockImplementation((key: string) => {
+      switch (key) {
+        case 'JWT_SECRET':
+          return JWT_SECRET;
+        case 'JWT_EXPIRATION_TIME':
+          return '3600s';
+        default:
+          return null;
+      }
+    }),
   };
 
   beforeEach(async () => {
@@ -75,15 +91,14 @@ describe('AuthController (e2e)', () => {
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: JwtService, useValue: mockJwtService },
-        { provide: JwtStratagy, useValue: mockJwtStrategy },
+        { provide: ConfigService, useValue: mockConfigService },
+        JwtStrategy,
       ],
     }).compile();
 
     app = module.createNestApplication();
     await app.init();
-
     authService = module.get<AuthService>(AuthService);
-    console.log('Application initialized. AuthService:', authService);
   });
 
   it('/auth/register (POST) should register a user', () => {
@@ -92,14 +107,14 @@ describe('AuthController (e2e)', () => {
       password: 'testPassword',
     };
 
-    console.log('Sending request with DTO:', authDto);
+    // console.log('Sending request with DTO:', authDto);
 
     return request(app.getHttpServer())
       .post('/auth/register')
       .send(authDto)
       .expect(201)
       .then((response) => {
-        console.log(response.body);
+        // console.log(response.body);
         expect(response.body.userName).toEqual(authDto.login);
       });
   });
@@ -214,6 +229,58 @@ describe('AuthController (e2e)', () => {
       .post('/auth/login')
       .send(authDto)
       .expect(500);
+  });
+
+  it('/auth/change-password (POST) should change password successfully', async () => {
+    const changePasswordDto = {
+      currentPassword: 'oldPassword',
+      newPassword: 'newPassword',
+    };
+
+    mockAuthService.changePassword.mockResolvedValue(true);
+
+    const response = await request(app.getHttpServer())
+      .patch('/auth/change-password')
+      .set('Authorization', `Bearer ${realToken}`) // Use the real token
+      .send(changePasswordDto)
+      .expect(200);
+    expect(response.body.message).toEqual('Password changed');
+  });
+
+  it('/auth/change-password (POST) should fail for wrong current password', async () => {
+    const changePasswordDto = {
+      currentPassword: 'wrongPassword',
+      newPassword: 'newPassword',
+    };
+
+    mockAuthService.changePassword.mockRejectedValue(
+      new UnauthorizedException('Invalid credentials'),
+    );
+
+    const response = await request(app.getHttpServer())
+      .patch('/auth/change-password')
+      .set('Authorization', `Bearer ${realToken}`)
+      .send(changePasswordDto)
+      .expect(401);
+    expect(response.body.message).toEqual('Invalid credentials');
+  });
+
+  it('/auth/change-password (POST) should fail for non-existent user', async () => {
+    const changePasswordDto = {
+      currentPassword: 'oldPassword',
+      newPassword: 'newPassword',
+    };
+
+    mockAuthService.changePassword.mockRejectedValue(
+      new UnauthorizedException('User not found'),
+    );
+
+    const response = await request(app.getHttpServer())
+      .patch('/auth/change-password')
+      .set('Authorization', `Bearer ${realToken}`)
+      .send(changePasswordDto)
+      .expect(401);
+    expect(response.body.message).toEqual('User not found');
   });
 
   afterEach(async () => {
