@@ -2,7 +2,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { INestApplication, UnauthorizedException } from '@nestjs/common';
+import {
+  INestApplication,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthDto } from './dto/auth.dto';
 import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
@@ -131,7 +135,7 @@ describe('AuthController (e2e)', () => {
 
   it('/auth/register (POST) should fail if login is missing', () => {
     const authDto = {
-      // password login
+      // login empty
       password: 'testPassword',
     };
 
@@ -139,6 +143,77 @@ describe('AuthController (e2e)', () => {
       .post('/auth/register')
       .send(authDto)
       .expect(400);
+  });
+
+  it('/auth/login (POST) should login successfully', () => {
+    const authDto: AuthDto = {
+      login: 'testUser',
+      password: 'testPassword',
+    };
+
+    mockAuthService.validateUser.mockResolvedValue({
+      userName: authDto.login,
+    });
+
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send(authDto)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.access_token).toBeDefined();
+      });
+  });
+
+  it('/auth/login (POST) should fail for incorrect password', () => {
+    const authDto: AuthDto = {
+      login: 'testUser',
+      password: 'wrongPassword',
+    };
+
+    mockAuthService.validateUser.mockRejectedValue(
+      new UnauthorizedException('Invalid credentials'),
+    );
+
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send(authDto)
+      .expect(401)
+      .then((response) => {
+        expect(response.body.message).toBe('Invalid credentials');
+      });
+  });
+
+  // it('/auth/login (POST) should fail for non-existing user', () => {
+  //   const authDto: AuthDto = {
+  //     login: 'nonExistentUser',
+  //     password: 'testPassword',
+  //   };
+
+  //   mockAuthService.validateUser.mockResolvedValue(null);
+
+  //   return request(app.getHttpServer())
+  //     .post('/auth/login')
+  //     .send(authDto)
+  //     .expect(401)
+  //     .then((response) => {
+  //       expect(response.body.message).toBe('User not found');
+  //     });
+  // });
+
+  it('/auth/login (POST) should handle server error', () => {
+    const authDto: AuthDto = {
+      login: 'testUser',
+      password: 'testPassword',
+    };
+
+    mockAuthService.validateUser.mockRejectedValue(
+      new InternalServerErrorException(),
+    );
+
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send(authDto)
+      .expect(500);
   });
 
   afterEach(async () => {
