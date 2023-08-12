@@ -29,7 +29,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { GetCategoryResponse } from './dto/response/get-category-res.dto';
+import { GetCategoryResponse } from './dto/get-category-res.dto';
 
 const singleExtensionRegex = /^[^.]+\.[a-zA-Z0-9]+$/;
 
