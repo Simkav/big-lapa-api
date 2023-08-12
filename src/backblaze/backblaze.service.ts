@@ -40,10 +40,14 @@ export class BackblazeService {
   async getFileInfo(url: string) {
     console.log(url, 'url');
     const res = await this.fileModel.findOne({ Url: url });
+    if (res === null) {
+      throw new NotFoundException('File not found');
+    }
     return res;
   }
 
   async getFile(id: string) {
+    await this.getFileInfo(id);
     try {
       const res = await this.bb2.downloadFileById({
         fileId: id,
@@ -60,10 +64,7 @@ export class BackblazeService {
   }
 
   async deleteFile(id: string): Promise<boolean> {
-    const file = await this.fileModel.findOne({ Url: id });
-    if (file === null) {
-      throw new NotFoundException('File not found');
-    }
+    await this.getFileInfo(id);
     const { fileName } = (await this.bb2.getFileInfo({ fileId: id })).data;
     (await this.bb2.deleteFileVersion({ fileId: id, fileName })).data;
     await this.fileModel.deleteOne({ Url: id });

@@ -24,6 +24,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -75,7 +76,6 @@ export class BackBlazeController {
     }
     const links = await Promise.all(
       images.map((image) =>
-        // this.fileService.convertToWebP(image.buffer, image.originalname),
         this.backblazeService.uploadFile(
           image.buffer,
           image.originalname,
@@ -87,6 +87,20 @@ export class BackBlazeController {
   }
 
   @Post('documents')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['document'],
+      properties: {
+        document: {
+          description: 'File to upload',
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiCreatedResponse({ description: 'Id of created document' })
   @UseInterceptors(
     FileInterceptor('document', {
@@ -137,18 +151,20 @@ export class BackBlazeController {
     );
     return link;
   }
-
+  @ApiNotFoundResponse({ description: 'File not found' })
+  @ApiOkResponse()
   @Get(':url')
   async getFileByUrl(@Param('url') url: string, @Res() response: Response) {
-    response.setHeader('Content-type', 'image');
-    console.log(url);
     const stream = await this.backblazeService.getFile(url);
+    response.setHeader('Content-type', 'image');
     stream.on('data', (data) => response.write(data));
     stream.on('end', () => {
       response.end();
     });
   }
 
+  @ApiNotFoundResponse({ description: 'Document not found' })
+  @ApiOkResponse()
   @Get('/document/:url')
   @ApiParam({ name: 'url', description: 'id of document', required: true })
   async getDocumentByUrl(@Param('url') url: string, @Res() response: Response) {
@@ -162,7 +178,7 @@ export class BackBlazeController {
   }
 
   @Get('category/:category')
-  @ApiOkResponse({ type: GetCategoryResponse })
+  @ApiOkResponse({ type: [GetCategoryResponse] })
   async getImagesByCategory(
     @Param('category') category: string,
   ): Promise<GetCategoryResponse[]> {
@@ -174,6 +190,8 @@ export class BackBlazeController {
     return filesResponse;
   }
 
+  @ApiOkResponse()
+  @ApiNotFoundResponse({ description: 'File not found' })
   @Delete(':id')
   async deleteFileById(@Param('id') id: string) {
     const result = await this.backblazeService.deleteFile(id);
