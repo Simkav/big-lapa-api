@@ -15,6 +15,7 @@ import { ALREADY_REGISTERED_ERROR } from './authConstants';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { UserName } from 'src/decorators/user.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -43,10 +44,13 @@ export class AuthController {
   @Patch('change-password')
   async changePassword(
     @UserName() userName: string,
-    @Body('oldPassword') oldPassword: string,
-    @Body('newPassword') newPassword: string,
+    @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    await this.authService.changePassword(userName, oldPassword, newPassword);
+    await this.authService.changePassword(
+      userName,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
+    );
     return { message: 'Password changed' };
   }
 }

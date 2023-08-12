@@ -11,7 +11,13 @@ import {
 import { DogCard } from './dog-card.model';
 import { DogCardService } from './dog-card.service';
 import { Response } from 'express';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('dog-cards')
 @Controller('dog-cards')
@@ -19,15 +25,20 @@ export class DogCardController {
   constructor(private readonly dogCardService: DogCardService) {}
 
   @Post()
+  @ApiCreatedResponse()
   async createDogCard(@Body() data: DogCard): Promise<DogCard> {
     return this.dogCardService.createDogCard(data);
   }
 
+  @ApiOkResponse({ type: [DogCard] })
   @Get()
   async getAllDogCards(): Promise<DogCard[]> {
     return this.dogCardService.getAllDogCards();
   }
 
+  @ApiOkResponse({ type: DogCard })
+  @ApiInternalServerErrorResponse()
+  @ApiNotFoundResponse()
   @Get(':id')
   async getDogCardById(
     @Param('id') id: string,
@@ -35,7 +46,6 @@ export class DogCardController {
   ): Promise<void> {
     try {
       const dogCard = await this.dogCardService.getDogCardById(id);
-
       if (!dogCard) {
         res.status(404).json({ message: `Dog card with id ${id} not found` });
       } else {
@@ -51,6 +61,8 @@ export class DogCardController {
   }
 
   @Delete(':id')
+  @ApiOkResponse()
+  @ApiInternalServerErrorResponse()
   async deleteDogCard(
     @Param('id') id: string,
     @Res() res: Response,
