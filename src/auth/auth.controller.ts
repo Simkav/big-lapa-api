@@ -13,7 +13,7 @@ import {
 import { AuthDto } from './dto/auth.dto';
 import { ALREADY_REGISTERED_ERROR } from './authConstants';
 import { JwtAuthGuard } from './guards/jwt.guard';
-import { UserName } from 'src/decorators/user.decorator';
+import { UserName } from '../decorators/user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
