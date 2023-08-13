@@ -9,6 +9,7 @@ import {
   UploadedFile,
   Body,
   Delete,
+  Header,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -151,9 +152,11 @@ export class BackBlazeController {
     );
     return link;
   }
+
   @ApiNotFoundResponse({ description: 'File not found' })
   @ApiOkResponse()
   @Get(':url')
+  @Header('Cache-control', 'max-age=31536000')
   async getFileByUrl(@Param('url') url: string, @Res() response: Response) {
     const stream = await this.backblazeService.getFile(url);
     response.setHeader('Content-type', 'image');
@@ -163,10 +166,11 @@ export class BackBlazeController {
     });
   }
 
+  @Get('/document/:url')
   @ApiNotFoundResponse({ description: 'Document not found' })
   @ApiOkResponse()
-  @Get('/document/:url')
   @ApiParam({ name: 'url', description: 'id of document', required: true })
+  @Header('Cache-control', 'max-age=31536000')
   async getDocumentByUrl(@Param('url') url: string, @Res() response: Response) {
     const getFileName = await this.backblazeService.getFileInfo(url);
     response.setHeader('Content-Type', 'application/octet-stream');
