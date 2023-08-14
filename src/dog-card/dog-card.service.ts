@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DogCard } from './dog-card.model';
 import { InjectModel } from 'nestjs-typegoose';
 import { Model } from 'mongoose';
+import { UpdateDogDto } from './dto/update-dog.dto';
 
 @Injectable()
 export class DogCardService {
@@ -13,13 +14,26 @@ export class DogCardService {
   }
 
   async getDogCardById(id: string): Promise<DogCard | null> {
-    const dogCard = await this.dogCardModel.findById(id).exec();
-
-    if (!dogCard) {
-      throw new NotFoundException(`Dog card with id ${id} not found`);
-    }
-
+    const dogCard = await this.findDogById(id);
     return dogCard;
+  }
+
+  private async findDogById(id: string) {
+    try {
+      const dog = await this.dogCardModel.findById(id);
+      if (dog === null) {
+        throw new NotFoundException('Dog not found');
+      }
+      return dog;
+    } catch (error) {
+      throw new NotFoundException('Dog not found');
+    }
+  }
+
+  async updateDog(id: string, updateDogDto: UpdateDogDto) {
+    const dog = await this.findDogById(id);
+    await dog.updateOne(updateDogDto);
+    return await this.dogCardModel.findById(id)
   }
 
   async getAllDogCards(): Promise<DogCard[]> {
@@ -28,11 +42,7 @@ export class DogCardService {
   }
 
   async deleteDogCardById(id: string): Promise<void> {
-    const dogCard = await this.dogCardModel.findById(id).exec();
-
-    if (!dogCard) {
-      throw new NotFoundException(`Dog card with id ${id} not found`);
-    }
+    await this.findDogById(id);
     await this.dogCardModel.findByIdAndDelete(id).exec();
   }
 }
