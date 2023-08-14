@@ -8,7 +8,8 @@ import { MainModule } from './mainPage/mainPage.module';
 import { DogCardModule } from './dog-card/dog-card.module';
 import { BackblazeModule } from './backblaze/backblaze.module';
 import { envValidationSchea } from './configs/env.config';
-import { FilesModule } from './files/files.module';
+import { MailModule } from './mail/mail.module';
+// import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -23,9 +24,10 @@ import { FilesModule } from './files/files.module';
     }),
     AuthModule,
     MainModule,
-    FilesModule,
+    // FilesModule,
     BackblazeModule,
     DogCardModule,
+    MailModule,
   ],
   controllers: [AppController],
 })
