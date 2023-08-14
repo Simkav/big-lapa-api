@@ -7,6 +7,7 @@ import {
   Delete,
   Res,
   NotFoundException,
+  Patch,
 } from '@nestjs/common';
 import { DogCard } from './dog-card.model';
 import { DogCardService } from './dog-card.service';
@@ -18,6 +19,8 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { CreateDogDto } from './dto/create-dog.dto';
+import { UpdateDogDto } from './dto/update-dog.dto';
 
 @ApiTags('dog-cards')
 @Controller('dog-cards')
@@ -26,8 +29,8 @@ export class DogCardController {
 
   @Post()
   @ApiCreatedResponse()
-  async createDogCard(@Body() data: DogCard): Promise<DogCard> {
-    return this.dogCardService.createDogCard(data);
+  async createDogCard(@Body() createDogDto: CreateDogDto): Promise<DogCard> {
+    return this.dogCardService.createDogCard(createDogDto);
   }
 
   @ApiOkResponse({ type: [DogCard] })
@@ -77,5 +80,10 @@ export class DogCardController {
         res.status(500).json({ message: 'An error occurred' });
       }
     }
+  }
+
+  @Patch(':id')
+  async updateDog(@Param('id') id: string, @Body() updateDogDto: UpdateDogDto) {
+    return await this.dogCardService.updateDog(id, updateDogDto);
   }
 }
