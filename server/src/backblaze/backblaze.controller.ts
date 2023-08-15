@@ -6,18 +6,15 @@ import {
   UseInterceptors,
   Res,
   BadRequestException,
-  UploadedFile,
   Body,
   Delete,
   Header,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
-import * as mimeTypes from 'mime-types';
 import { BackblazeService } from './backblaze.service';
 import { ValidateUploadFiles } from './decorators/validate.upload.files.decorator';
 import { FileService } from '../files/file.service';
-import { extname } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { IEnv } from 'src/configs/env.config';
 import { UploadImageDto } from './dto/upload-image.dto';
@@ -31,8 +28,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GetCategoryResponse } from './dto/get-category-res.dto';
-
-const singleExtensionRegex = /^[^.]+\.[a-zA-Z0-9]+$/;
 
 @ApiTags('files')
 @Controller('files')
@@ -103,45 +98,11 @@ export class BackBlazeController {
     },
   })
   @ApiCreatedResponse({ description: 'Id of created document' })
-  @UseInterceptors(
-    FileInterceptor('document', {
-      fileFilter: (req, file, cb) => {
-        const allowedExtensions = ['.txt', '.pdf', '.doc'];
-        const fileExtension = extname(file.originalname);
-        const mimeType = mimeTypes.lookup(fileExtension);
-
-        if (
-          allowedExtensions.includes(fileExtension) &&
-          (mimeType === 'text/plain' ||
-            mimeType === 'application/pdf' ||
-            mimeType === 'application/msword')
-        ) {
-          if (!singleExtensionRegex.test(file.originalname)) {
-            cb(
-              new BadRequestException(
-                'Invalid file name. Double extensions are not allowed.',
-              ),
-              false,
-            );
-            return;
-          }
-
-          cb(null, true);
-        } else {
-          cb(
-            new BadRequestException(
-              'Only .txt, .doc, and .pdf files are allowed',
-            ),
-            false,
-          );
-        }
-      },
-      limits: {
-        fileSize: 2 * 1024 * 1024,
-      },
-    }),
-  )
-  async uploadDocument(@UploadedFile() document: Express.Multer.File) {
+  @UseInterceptors(FileInterceptor('document'))
+  async uploadDocument(
+    @ValidateUploadFiles(2_097_152, ['.txt', '.pdf', '.doc'])
+    document: Express.Multer.File,
+  ) {
     if (!document) {
       throw new BadRequestException('No files uploaded');
     }
