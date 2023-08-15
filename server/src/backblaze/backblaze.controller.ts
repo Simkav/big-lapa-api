@@ -15,7 +15,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import * as mimeTypes from 'mime-types';
 import { BackblazeService } from './backblaze.service';
-import { ValidateUploadFiels } from './decorators/validate.upload.files.decorator';
+import { ValidateUploadFiles } from './decorators/validate.upload.files.decorator';
 import { FileService } from '../files/file.service';
 import { extname } from 'path';
 import { ConfigService } from '@nestjs/config';
@@ -68,7 +68,7 @@ export class BackBlazeController {
   })
   @UseInterceptors(FilesInterceptor('images', 6))
   async uploadImage(
-    @ValidateUploadFiels(2_097_152, 'image')
+    @ValidateUploadFiles(2_097_152, ['.ico', '.png', '.jpeg'])
     images: Express.Multer.File[],
     @Body() uploadImageDto: UploadImageDto,
   ) {
