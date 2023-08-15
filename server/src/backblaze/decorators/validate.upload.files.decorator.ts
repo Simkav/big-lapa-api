@@ -3,8 +3,8 @@ import {
   MaxFileSizeValidator,
   ParseFilePipe,
   UploadedFiles,
-} from '@nestjs/common'
-import { ParseFilesPipe } from '../pipes/parse-files.pipe'
+} from '@nestjs/common';
+import { ParseFilesPipe } from '../pipes/parse-files.pipe';
 
 export const ValidateUploadFiels = (
   maxSize: number,
@@ -22,4 +22,4 @@ export const ValidateUploadFiels = (
         ],
       }),
     ),
-  )
+  );

@@ -158,7 +158,7 @@ export class BackBlazeController {
   @Get(':url')
   @Header('Cache-control', 'max-age=31536000')
   async getFileByUrl(@Param('url') url: string, @Res() response: Response) {
-    console.log('test',new Date())
+    console.log('test', new Date());
     const stream = await this.backblazeService.getFile(url);
     response.setHeader('Content-type', 'image');
     stream.on('data', (data) => response.write(data));
