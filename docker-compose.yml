@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  api:
+    build:
+      context: ./server
+    environment:
+      - PORT
+      - MONGO_URL
+      - JWT_SECRET
+      - BB2_SECRET_KEY
+      - BB2_SECRET_KEY_NAME
+      - BB2_FILES_BUCKET_ID
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_USER
+      - SMTP_PASSWORD
+    networks:
+      - big-lapa-network
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+    networks:
+      - big-lapa-network
+    ports:
+      - "80:80"
+
+networks:
+  big-lapa-network:
