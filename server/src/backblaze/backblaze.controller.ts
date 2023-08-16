@@ -28,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GetCategoryResponse } from './dto/get-category-res.dto';
+import { ValidateUploadFile } from './decorators/validate.upload.single.file.decorator';
 
 @ApiTags('files')
 @Controller('files')
@@ -100,7 +101,7 @@ export class BackBlazeController {
   @ApiCreatedResponse({ description: 'Id of created document' })
   @UseInterceptors(FileInterceptor('document'))
   async uploadDocument(
-    @ValidateUploadFiles(2_097_152, ['.txt', '.pdf', '.doc'])
+    @ValidateUploadFile(2_097_152, ['.txt', '.pdf', '.doc'])
     document: Express.Multer.File,
   ) {
     if (!document) {
