@@ -3,13 +3,14 @@ import { DogCard } from './dog-card.model';
 import { InjectModel } from 'nestjs-typegoose';
 import { Model } from 'mongoose';
 import { UpdateDogDto } from './dto/update-dog.dto';
+import { CreateDogDto } from './dto/create-dog.dto';
 
 @Injectable()
 export class DogCardService {
   constructor(@InjectModel(DogCard) private dogCardModel: Model<DogCard>) {}
 
-  async createDogCard(data: DogCard): Promise<DogCard> {
-    const createdDogCard = await this.dogCardModel.create(data);
+  async createDogCard(createDogDto: CreateDogDto): Promise<DogCard> {
+    const createdDogCard = await this.dogCardModel.create(createDogDto);
     return createdDogCard.toObject();
   }
 
@@ -33,7 +34,7 @@ export class DogCardService {
   async updateDog(id: string, updateDogDto: UpdateDogDto) {
     const dog = await this.findDogById(id);
     await dog.updateOne(updateDogDto);
-    return await this.dogCardModel.findById(id)
+    return await this.dogCardModel.findById(id);
   }
 
   async getAllDogCards(): Promise<DogCard[]> {
