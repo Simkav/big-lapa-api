@@ -1,19 +1,11 @@
 import { FileValidator } from '@nestjs/common';
-import { IFile } from '@nestjs/common/pipes/file/interfaces';
 import path from 'path';
 
 type CustomFileTypeValidatorOptions = {
   fileExtensions: string[];
 };
 
-export interface CustomIFile extends IFile {
-  originalname: string;
-}
-
-export class CustomFileTypeValidator extends FileValidator<
-  CustomFileTypeValidatorOptions,
-  CustomIFile
-> {
+export class CustomFileTypeValidator extends FileValidator<CustomFileTypeValidatorOptions> {
   buildErrorMessage(): string {
     return (
       'Invalid file extension. Allowed extensions are: ' +
@@ -21,7 +13,7 @@ export class CustomFileTypeValidator extends FileValidator<
     );
   }
 
-  isValid(file?: CustomIFile): boolean {
+  isValid(file: Express.Multer.File): boolean {
     if (!file) return false;
 
     const fileExtension = path.extname(file.originalname).toLowerCase();
