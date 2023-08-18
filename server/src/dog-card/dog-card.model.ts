@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { prop } from '@typegoose/typegoose';
-import { IsArray, IsBoolean, IsString } from 'class-validator';
-
+import { IsBoolean, IsString } from 'class-validator';
 export class DogCard {
   @ApiProperty()
   @prop({ required: true })
@@ -10,7 +9,7 @@ export class DogCard {
 
   @ApiProperty()
   @prop({ required: true })
-  @IsArray()
+  @IsString({ each: true })
   photos: string[];
 
   @ApiProperty()
