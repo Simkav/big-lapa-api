@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DogCard } from './dog-card.model';
 import { InjectModel } from 'nestjs-typegoose';
 import { Model } from 'mongoose';
@@ -10,7 +10,7 @@ import { BackblazeService } from 'src/backblaze/backblaze.service';
 export class DogCardService {
   constructor(
     @InjectModel(DogCard) private dogCardModel: Model<DogCard>,
-    @Inject(BackblazeService) private backblazeService: BackblazeService,
+    private readonly backblazeService: BackblazeService,
   ) {}
 
   async createDogCard(createDogDto: CreateDogDto): Promise<DogCard> {
@@ -39,11 +39,16 @@ export class DogCardService {
     const dog = await this.findDogById(id);
 
     if (updateDogDto.photos) {
-      const updatedPhotosFlat = updateDogDto.photos.flat();
       for (const photo of dog.photos) {
-        if (!updatedPhotosFlat.includes(photo)) {
+        if (!updateDogDto.photos.includes(photo)) {
           await this.backblazeService.deleteFile(photo);
         }
+      }
+    }
+
+    if (updateDogDto.mainPhoto) {
+      if (updateDogDto.mainPhoto !== dog.mainPhoto) {
+        await this.backblazeService.deleteFile(dog.mainPhoto);
       }
     }
     await dog.updateOne(updateDogDto);

@@ -3,6 +3,7 @@ import { DogCardController } from './dog-card.controller';
 import { DogCardService } from './dog-card.service';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { DogCard } from './dog-card.model';
+import { BackblazeModule } from 'src/backblaze/backblaze.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DogCard } from './dog-card.model';
         },
       },
     ]),
+    BackblazeModule,
   ],
   controllers: [DogCardController],
   providers: [DogCardService],
