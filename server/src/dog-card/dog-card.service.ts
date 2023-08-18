@@ -4,10 +4,14 @@ import { InjectModel } from 'nestjs-typegoose';
 import { Model } from 'mongoose';
 import { UpdateDogDto } from './dto/update-dog.dto';
 import { CreateDogDto } from './dto/create-dog.dto';
+import { BackblazeService } from 'src/backblaze/backblaze.service';
 
 @Injectable()
 export class DogCardService {
-  constructor(@InjectModel(DogCard) private dogCardModel: Model<DogCard>) {}
+  constructor(
+    @InjectModel(DogCard) private dogCardModel: Model<DogCard>,
+    private readonly backblazeService: BackblazeService,
+  ) {}
 
   async createDogCard(createDogDto: CreateDogDto): Promise<DogCard> {
     const createdDogCard = await this.dogCardModel.create(createDogDto);
@@ -33,6 +37,20 @@ export class DogCardService {
 
   async updateDog(id: string, updateDogDto: UpdateDogDto) {
     const dog = await this.findDogById(id);
+
+    if (updateDogDto.photos) {
+      for (const photo of dog.photos) {
+        if (!updateDogDto.photos.includes(photo)) {
+          await this.backblazeService.deleteFile(photo);
+        }
+      }
+    }
+
+    if (updateDogDto.mainPhoto) {
+      if (updateDogDto.mainPhoto !== dog.mainPhoto) {
+        await this.backblazeService.deleteFile(dog.mainPhoto);
+      }
+    }
     await dog.updateOne(updateDogDto);
     return await this.dogCardModel.findById(id);
   }
