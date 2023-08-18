@@ -1,14 +1,14 @@
 import {
-  FileTypeValidator,
   MaxFileSizeValidator,
   ParseFilePipe,
   UploadedFiles,
-} from '@nestjs/common'
-import { ParseFilesPipe } from '../pipes/parse-files.pipe'
+} from '@nestjs/common';
+import { ParseFilesPipe } from '../pipes/parse-files.pipe';
+import { CustomFileTypeValidator } from '../custom-file-type-validator/CustomFileTypeValidator';
 
-export const ValidateUploadFiels = (
+export const ValidateUploadFiles = (
   maxSize: number,
-  fileType: string | RegExp,
+  fileExtensions: string[],
 ) =>
   UploadedFiles(
     new ParseFilesPipe(
@@ -16,10 +16,10 @@ export const ValidateUploadFiels = (
         fileIsRequired: true,
         validators: [
           new MaxFileSizeValidator({ maxSize }),
-          new FileTypeValidator({
-            fileType,
+          new CustomFileTypeValidator({
+            fileExtensions,
           }),
         ],
       }),
     ),
-  )
+  );
