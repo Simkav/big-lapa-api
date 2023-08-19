@@ -11,6 +11,6 @@ export class MailController {
   @ApiCreatedResponse()
   @Post('/feedback')
   async sendFeedbackEmail(@Body() sendEmailDto: SendEmailDto) {
-    return this.mailService.sendEmail(sendEmailDto);
+    return this.mailService.sendEmailFeedback(sendEmailDto);
   }
 }

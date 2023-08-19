@@ -14,7 +14,7 @@ export class MailService {
     this.from = this.configService.get('SMTP_USER');
   }
 
-  async sendEmail(sendEmailDto: SendEmailDto) {
+  async sendEmailFeedback(sendEmailDto: SendEmailDto) {
     const subject = `Feedback from ${sendEmailDto.email}`;
     const text = `
     Name: ${sendEmailDto.name}
