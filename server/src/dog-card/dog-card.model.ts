@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { prop } from '@typegoose/typegoose';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 export class DogCard {
   @ApiProperty()
   @prop({ required: true })
@@ -16,6 +16,12 @@ export class DogCard {
   @IsString()
   @prop({ required: true })
   name: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  @prop({ required: true })
+  description?: string;
 
   @ApiProperty()
   @IsString()
