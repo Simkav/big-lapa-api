@@ -38,7 +38,6 @@ export class BackblazeService {
   }
 
   async getFileInfo(url: string) {
-    console.log(url, 'url');
     const res = await this.fileModel.findOne({ Url: url });
     if (res === null) {
       throw new NotFoundException('File not found');

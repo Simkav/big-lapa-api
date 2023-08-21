@@ -14,6 +14,12 @@ export class DogCardService {
   ) {}
 
   async createDogCard(createDogDto: CreateDogDto): Promise<DogCard> {
+    const photosToCheck = [...createDogDto.photos, createDogDto.mainPhoto];
+    try {
+      await Promise.all(photosToCheck.map(photo=>this.backblazeService.getFileInfo(photo)));
+    } catch (error) {
+      throw new NotFoundException('Uploaded files not found');
+    }
     const createdDogCard = await this.dogCardModel.create(createDogDto);
     return createdDogCard.toObject();
   }
