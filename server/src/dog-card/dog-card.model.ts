@@ -20,7 +20,7 @@ export class DogCard {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @prop({ required: true })
+  @prop()
   description?: string;
 
   @ApiProperty()
