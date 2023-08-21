@@ -18,10 +18,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       isGlobal: true,
       validationSchema: envValidationSchea,
     }),
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 2,
-    }),
+    ThrottlerModule.forRoot({}),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
