@@ -8,6 +8,9 @@ import {
 @ValidatorConstraint({ async: true })
 export class IsNotRuEmailConstraint implements ValidatorConstraintInterface {
   validate(email: string) {
+    if (!email) {
+      return false;
+    }
     return !email.includes('.ru');
   }
 
