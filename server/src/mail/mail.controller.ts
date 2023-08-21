@@ -1,7 +1,7 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { SendEmailDto } from './dto/send-email.dto';
 import { MailService } from './mail.service';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ThrottlerBehindProxyGuard } from 'src/guards/throttler-behind-proxy.guard';
 import { Throttle } from '@nestjs/throttler';
 
@@ -10,8 +10,7 @@ import { Throttle } from '@nestjs/throttler';
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
-  @ApiCreatedResponse()
-  @HttpCode(200)
+  @ApiOkResponse()
   @Throttle(2, 60)
   @UseGuards(ThrottlerBehindProxyGuard)
   @Post('/feedback')
