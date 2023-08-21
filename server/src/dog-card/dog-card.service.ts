@@ -17,15 +17,15 @@ export class DogCardService {
     const photosToCheck = [...createDogDto.photos, createDogDto.mainPhoto];
     const missingPhotos = [];
 
-    await Promise.all(
-      photosToCheck.map(async (photo) => {
-        try {
-          await this.backblazeService.getFileInfo(photo);
-        } catch (error) {
-          missingPhotos.push(photo);
-        }
-      }),
+    const results = await Promise.allSettled(
+      photosToCheck.map((photo) => this.backblazeService.getFileInfo(photo)),
     );
+
+    results.forEach((result, id) => {
+      if (result.status === 'rejected') {
+        missingPhotos.push(photosToCheck[id]);
+      }
+    });
 
     if (missingPhotos.length > 0) {
       throw new NotFoundException(
