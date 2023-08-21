@@ -13,12 +13,21 @@ export class MailService {
   ) {
     this.from = this.configService.get('SMTP_USER');
   }
-  async sendEmail(sendEmailDto: SendEmailDto) {
-    return await this.mailer.sendMail({
+
+  async sendEmailFeedback(sendEmailDto: SendEmailDto) {
+    const subject = `Feedback from ${sendEmailDto.email}`;
+    const text = `
+    Name: ${sendEmailDto.name}
+    Email: ${sendEmailDto.email}
+    Question: ${sendEmailDto.question}
+  `;
+    const result = await this.mailer.sendMail({
       to: this.from,
       from: this.from,
-      text: sendEmailDto.text,
-      subject: 'Test',
+      text: text,
+      subject: subject,
     });
+
+    return result;
   }
 }

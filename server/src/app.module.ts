@@ -9,6 +9,7 @@ import { DogCardModule } from './dog-card/dog-card.module';
 import { BackblazeModule } from './backblaze/backblaze.module';
 import { envValidationSchea } from './configs/env.config';
 import { MailModule } from './mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 // import { FilesModule } from './files/files.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { MailModule } from './mail/mail.module';
       isGlobal: true,
       validationSchema: envValidationSchea,
     }),
+    ThrottlerModule.forRoot({}),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

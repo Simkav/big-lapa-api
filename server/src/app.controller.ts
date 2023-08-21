@@ -12,6 +12,6 @@ export class AppController {
   }
   @Post('/email')
   async testEmail(@Body() sendEmailDto: SendEmailDto) {
-    return await this.mailService.sendEmail(sendEmailDto);
+    return await this.mailService.sendEmailFeedback(sendEmailDto);
   }
 }
