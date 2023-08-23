@@ -13,13 +13,17 @@ export class DogCardService {
     private readonly backblazeService: BackblazeService,
   ) {}
 
-  async createDogCard(createDogDto: CreateDogDto): Promise<DogCard> {
+  async createDogCard(createDogDto: CreateDogDto) {
     const photosToCheck = [...createDogDto.photos, createDogDto.mainPhoto];
-    try {
-      await Promise.all(photosToCheck.map(photo=>this.backblazeService.getFileInfo(photo)));
-    } catch (error) {
-      throw new NotFoundException('Uploaded files not found');
+    const missingPhotos =
+      await this.backblazeService.checkMissingPhotos(photosToCheck);
+
+    if (missingPhotos.length) {
+      throw new NotFoundException(
+        `Missing photos: ${missingPhotos.join(', ')}`,
+      );
     }
+
     const createdDogCard = await this.dogCardModel.create(createDogDto);
     return createdDogCard.toObject();
   }
@@ -43,6 +47,15 @@ export class DogCardService {
 
   async updateDog(id: string, updateDogDto: UpdateDogDto) {
     const dog = await this.findDogById(id);
+    const photosToCheck = [...updateDogDto.photos, updateDogDto.mainPhoto];
+    const missingPhotos =
+      await this.backblazeService.checkMissingPhotos(photosToCheck);
+
+    if (missingPhotos.length) {
+      throw new NotFoundException(
+        `Missing photos: ${missingPhotos.join(', ')}`,
+      );
+    }
 
     if (updateDogDto.photos) {
       for (const photo of dog.photos) {

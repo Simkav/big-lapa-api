@@ -62,6 +62,19 @@ export class BackblazeService {
     return this.fileModel.find({ category: category.toLowerCase() }).exec();
   }
 
+  async checkMissingPhotos(photos: string[]): Promise<string[]> {
+    const missingPhotos = [];
+    const results = await Promise.allSettled(
+      photos.map((photo) => this.getFileInfo(photo)),
+    );
+
+    results.forEach((result, id) => {
+      if (result.status === 'rejected') missingPhotos.push(photos[id]);
+    });
+
+    return missingPhotos;
+  }
+
   async deleteFile(id: string): Promise<boolean> {
     await this.getFileInfo(id);
     const { fileName } = (await this.bb2.getFileInfo({ fileId: id })).data;
