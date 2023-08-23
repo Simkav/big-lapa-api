@@ -15,15 +15,8 @@ export class DogCardService {
 
   async createDogCard(createDogDto: CreateDogDto) {
     const photosToCheck = [...createDogDto.photos, createDogDto.mainPhoto];
-    const missingPhotos = [];
-
-    const results = await Promise.allSettled(
-      photosToCheck.map((photo) => this.backblazeService.getFileInfo(photo)),
-    );
-
-    results.forEach((result, id) => {
-      if (result.status === 'rejected') missingPhotos.push(photosToCheck[id]);
-    });
+    const missingPhotos =
+      await this.backblazeService.checkMissingPhotos(photosToCheck);
 
     if (missingPhotos.length) {
       throw new NotFoundException(
@@ -55,15 +48,8 @@ export class DogCardService {
   async updateDog(id: string, updateDogDto: UpdateDogDto) {
     const dog = await this.findDogById(id);
     const photosToCheck = [...updateDogDto.photos, updateDogDto.mainPhoto];
-    const missingPhotos = [];
-
-    const results = await Promise.allSettled(
-      photosToCheck.map((photo) => this.backblazeService.getFileInfo(photo)),
-    );
-
-    results.forEach((result, id) => {
-      if (result.status === 'rejected') missingPhotos.push(photosToCheck[id]);
-    });
+    const missingPhotos =
+      await this.backblazeService.checkMissingPhotos(photosToCheck);
 
     if (missingPhotos.length) {
       throw new NotFoundException(
