@@ -30,4 +30,19 @@ export class MailService {
 
     return result;
   }
+
+  async sendResetPasswordEmail(email: string, token: string) {
+    const resetPasswordLink = `http://your-frontend-url/reset-password?token=${token}`;
+    const subject = `Password Reset Request`;
+    const text = `You have requested to reset your password. Please click the link below to reset your password:\n\n${resetPasswordLink}\n\nIf you did not request this, please ignore this email.`;
+
+    const result = await this.mailer.sendMail({
+      to: this.from,
+      from: this.from,
+      text: text,
+      subject: subject,
+    });
+
+    return result;
+  }
 }

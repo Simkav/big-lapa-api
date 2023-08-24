@@ -1,3 +1,4 @@
+import { MailService } from './../mail/mail.service';
 import {
   Injectable,
   NotFoundException,
@@ -16,6 +17,7 @@ export class AuthService {
   constructor(
     @InjectModel(UserModel) private readonly userModel: Model<UserModel>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async findUser(userName: string) {
@@ -67,6 +69,33 @@ export class AuthService {
     const isCorrectPassword = await compare(oldPassword, user.passwordHash);
     if (!isCorrectPassword) {
       throw new UnauthorizedException(WRONG_PASSWORD_ERROR);
+    }
+
+    const salt = await genSalt(10);
+    user.passwordHash = await hash(newPassword, salt);
+    await user.save();
+  }
+
+  async generateResetPasswordToken(email: string) {
+    const user = await this.findUser(email);
+    if (!user) {
+      throw new NotFoundException(USER_NOT_FOUND_ERROR);
+    }
+
+    const payload = { userName: user.userName, resetPassword: true };
+    const token = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
+    await this.mailService.sendResetPasswordEmail(email, token);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const payload = this.jwtService.verify(token);
+    if (!payload || !payload.resetPassword) {
+      throw new UnauthorizedException('Invalid reset password token');
+    }
+
+    const user = await this.findUser(payload.userName);
+    if (!user) {
+      throw new NotFoundException(USER_NOT_FOUND_ERROR);
     }
 
     const salt = await genSalt(10);

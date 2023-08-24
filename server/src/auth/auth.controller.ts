@@ -53,4 +53,18 @@ export class AuthController {
     );
     return { message: 'Password changed' };
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() { email }: { email: string }) {
+    const token = await this.authService.generateResetPasswordToken(email);
+    return { token };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() { token, newPassword }: { token: string; newPassword: string },
+  ) {
+    await this.authService.resetPassword(token, newPassword);
+    return { message: 'Password successfully reset' };
+  }
 }
