@@ -54,12 +54,14 @@ export class AuthController {
     return { message: 'Password changed' };
   }
 
+  @HttpCode(200)
   @Post('forgot-password')
   async forgotPassword(@Body() { email }: { email: string }) {
     const token = await this.authService.generateResetPasswordToken(email);
     return { token };
   }
 
+  @HttpCode(200)
   @Post('reset-password')
   async resetPassword(
     @Body() { token, newPassword }: { token: string; newPassword: string },
