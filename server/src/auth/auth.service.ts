@@ -88,7 +88,13 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const payload = this.jwtService.verify(token);
+    let payload;
+    try {
+      payload = this.jwtService.verify(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid reset password token');
+    }
+
     if (!payload || !payload.resetPassword) {
       throw new UnauthorizedException('Invalid reset password token');
     }

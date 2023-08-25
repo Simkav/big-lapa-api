@@ -16,6 +16,8 @@ import { JwtAuthGuard } from './guards/jwt.guard';
 import { UserName } from '../decorators/user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -56,17 +58,17 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('forgot-password')
-  async forgotPassword(@Body() { email }: { email: string }) {
-    const token = await this.authService.generateResetPasswordToken(email);
-    return { token };
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    await this.authService.generateResetPasswordToken(forgotPasswordDto.email);
   }
 
   @HttpCode(200)
   @Post('reset-password')
-  async resetPassword(
-    @Body() { token, newPassword }: { token: string; newPassword: string },
-  ) {
-    await this.authService.resetPassword(token, newPassword);
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.newPassword,
+    );
     return { message: 'Password successfully reset' };
   }
 }
