@@ -11,6 +11,8 @@ import { AuthDto } from './dto/auth.dto';
 import { genSalt, hash, compare } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { USER_NOT_FOUND_ERROR, WRONG_PASSWORD_ERROR } from './authConstants';
+import { ConfigService } from '@nestjs/config';
+import { IEnv } from 'src/configs/env.config';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
     @InjectModel(UserModel) private readonly userModel: Model<UserModel>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly configService: ConfigService<IEnv>,
   ) {}
 
   async findUser(userName: string) {
@@ -83,7 +86,9 @@ export class AuthService {
     }
 
     const payload = { userName: user.userName, resetPassword: true };
-    const token = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
+    const token = this.jwtService.sign(payload, {
+      expiresIn: process.env.reset_Token_TTL,
+    });
     await this.mailService.sendResetPasswordEmail(email, token);
   }
 
