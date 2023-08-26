@@ -28,4 +28,5 @@ export const envValidationSchea = Joi.object<IEnv>({
   SMTP_PORT: baseNumber,
   SMTP_USER: baseString,
   SMTP_PASSWORD: baseString,
+  RESET_TOKEN_TTL: baseString,
 });
