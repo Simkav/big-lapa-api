@@ -87,7 +87,7 @@ export class AuthService {
 
     const payload = { userName: user.userName, resetPassword: true };
     const token = this.jwtService.sign(payload, {
-      expiresIn: process.env.reset_Token_TTL,
+      expiresIn: this.configService.get('RESET_TOKEN_TTL'),
     });
     await this.mailService.sendResetPasswordEmail(email, token);
   }

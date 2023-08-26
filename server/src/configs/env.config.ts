@@ -11,6 +11,7 @@ export interface IEnv {
   SMTP_PORT: number;
   SMTP_USER: string;
   SMTP_PASSWORD: string;
+  RESET_TOKEN_TTL: string;
 }
 
 const baseString = Joi.string().required().exist();
