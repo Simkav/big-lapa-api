@@ -1,3 +1,4 @@
+import { MailService } from './../mail/mail.service';
 import {
   Injectable,
   NotFoundException,
@@ -10,12 +11,16 @@ import { AuthDto } from './dto/auth.dto';
 import { genSalt, hash, compare } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { USER_NOT_FOUND_ERROR, WRONG_PASSWORD_ERROR } from './authConstants';
+import { ConfigService } from '@nestjs/config';
+import { IEnv } from 'src/configs/env.config';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(UserModel) private readonly userModel: Model<UserModel>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService<IEnv>,
   ) {}
 
   async findUser(userName: string) {
@@ -67,6 +72,41 @@ export class AuthService {
     const isCorrectPassword = await compare(oldPassword, user.passwordHash);
     if (!isCorrectPassword) {
       throw new UnauthorizedException(WRONG_PASSWORD_ERROR);
+    }
+
+    const salt = await genSalt(10);
+    user.passwordHash = await hash(newPassword, salt);
+    await user.save();
+  }
+
+  async generateResetPasswordToken(email: string) {
+    const user = await this.findUser(email);
+    if (!user) {
+      throw new NotFoundException(USER_NOT_FOUND_ERROR);
+    }
+
+    const payload = { userName: user.userName, resetPassword: true };
+    const token = this.jwtService.sign(payload, {
+      expiresIn: this.configService.get('RESET_TOKEN_TTL'),
+    });
+    await this.mailService.sendResetPasswordEmail(email, token);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    let payload;
+    try {
+      payload = this.jwtService.verify(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid reset password token');
+    }
+
+    if (!payload || !payload.resetPassword) {
+      throw new UnauthorizedException('Invalid reset password token');
+    }
+
+    const user = await this.findUser(payload.userName);
+    if (!user) {
+      throw new NotFoundException(USER_NOT_FOUND_ERROR);
     }
 
     const salt = await genSalt(10);
