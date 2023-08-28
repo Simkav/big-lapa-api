@@ -64,7 +64,7 @@ export class BackBlazeController {
   })
   @UseInterceptors(FilesInterceptor('images', 6))
   async uploadImage(
-    @ValidateUploadFiles(2_097_152, ['.ico', '.png', '.jpeg'])
+    @ValidateUploadFiles(2_097_152, ['.ico', '.png', '.jpeg','.jpg'])
     images: Express.Multer.File[],
     @Body() uploadImageDto: UploadImageDto,
   ) {
