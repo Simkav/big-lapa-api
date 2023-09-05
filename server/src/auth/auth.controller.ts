@@ -3,8 +3,6 @@ import {
   Body,
   Controller,
   Post,
-  UsePipes,
-  ValidationPipe,
   BadRequestException,
   HttpCode,
   UseGuards,
@@ -24,7 +22,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UsePipes(new ValidationPipe())
   @Post('register')
   async register(@Body() dto: AuthDto) {
     const oldUser = await this.authService.findUser(dto.login);
@@ -34,7 +31,6 @@ export class AuthController {
     return this.authService.createUser(dto);
   }
 
-  @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Post('login')
   async login(@Body() { login, password }: AuthDto) {
