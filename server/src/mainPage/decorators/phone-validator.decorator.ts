@@ -16,6 +16,7 @@ export class ValidateNumberConstraint implements ValidatorConstraintInterface {
       return false;
     }
     const splitedNumbers = number.split(' ');
+    if(splitedNumbers[0]!=='380') return false
     return splitedNumbers.every(
       (numbers, i) => numbers.length === splitedNumberLengths[i],
     );
