@@ -19,5 +19,6 @@ import { BackblazeModule } from 'src/backblaze/backblaze.module';
   ],
   controllers: [DogCardController],
   providers: [DogCardService],
+  exports: [DogCardService],
 })
 export class DogCardModule {}
