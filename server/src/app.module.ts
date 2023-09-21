@@ -11,6 +11,8 @@ import { envValidationSchea } from './configs/env.config';
 import { MailModule } from './mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 // import { FilesModule } from './files/files.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
     BackblazeModule,
     DogCardModule,
     MailModule,
+    ScheduleModule.forRoot(),
+    CronModule,
   ],
   controllers: [AppController],
 })

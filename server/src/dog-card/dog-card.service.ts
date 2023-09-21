@@ -83,4 +83,10 @@ export class DogCardService {
     await this.findDogById(id);
     await this.dogCardModel.findByIdAndDelete(id).exec();
   }
+
+  async checkIncludedPhotos(Url: string) {
+    return this.dogCardModel.find({
+      $or: [{ photos: { $elemMatch: { $eq: Url } } }, { mainPhoto: Url }],
+    });
+  }
 }
